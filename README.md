@@ -1,9 +1,8 @@
 ![Logo](https://raw.github.com/gigc/Janua/master/site/img/LogoJanua.png) 
 # JANUS 
-Accelerate your 3D scene using Janua!
-Java port of the Open Source 3D occlusion culling engine
+Accelerate your 3D scene using Janus!
 
-Janus is a java port of Janua, an automatic portal and cell generator used to perform occlusion culling in 3D scenes.
+Janus is a java port of [Janua](https://github.com/gigc/Janua), an automatic portal and cell generator used to perform occlusion culling in 3D scenes.
 Janua calculates the Potentially Visible Set (PVS) of the scene and saves it into a file that is queried at runtime.
 
 ## FEATURES
