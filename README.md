@@ -1,4 +1,4 @@
-	![Logo](https://raw.github.com/gigc/Janua/master/site/img/LogoJanua.png)    
+![Logo](https://raw.github.com/gigc/Janua/master/site/img/LogoJanua.png) 
 # JANUS 
 Accelerate your 3D scene using Janua!
 Java port of the Open Source 3D occlusion culling engine
@@ -7,7 +7,7 @@ Janus is a java port of Janua, an automatic portal and cell generator used to pe
 Janua calculates the Potentially Visible Set (PVS) of the scene and saves it into a file that is queried at runtime.
 
 ## FEATURES
-### Native
+### Native (none of those are implemented yet)
 * Free and Open Source.
 * Extremely low memory footprint.
 * Supports up to 1 million occluders in the scene.
@@ -26,11 +26,11 @@ Follow our [Tutorial](https://github.com/gigc/Janua/wiki/Tutorial)  and start us
 
 **Scene without Occlussion Culling**
 All the models rendered from the red box region, however not all of them are visible from that perspective. Many models are Occluded and therefore not visible.
-![screenshot1](https://raw.github.com/gigc/Janua/master/site/img/JanuaImg1.jpg).
+![screenshot1](https://raw.github.com/gigc/Janua/master/site/img/JanuaImg1.jpg)
 
 **Scene with Janua Occlussion Culling**
 Only the objects that are highly likely to be visible are considered for rendering. This speeds up the rendering process significantly.
-![screenshot2](https://raw.github.com/gigc/Janua/master/site/img/JanuaImg2.jpg).
+![screenshot2](https://raw.github.com/gigc/Janua/master/site/img/JanuaImg2.jpg)
 
 
 ## LICENSE
