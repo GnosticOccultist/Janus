@@ -49,6 +49,32 @@ public class Vector3f implements Comparable<Vector3f> {
 		this.vector[1] = Math.max(vector[1], vertices[i + 1]);
 		this.vector[2] = Math.max(vector[2], vertices[i + 2]);
 	}
+	
+	public Vector3f add(Vector3f amount, Vector3f store) {
+		store.set(x() + amount.x(), y() + amount.y(), z() + amount.z());
+		return store;
+	}
+	
+	public Vector3f sub(Vector3f amount, Vector3f store) {
+		store.set(x() - amount.x(), y() - amount.y(), z() - amount.z());
+		return store;
+	}
+	
+	public void div(float divisor) {
+		set(x() / divisor, y() / divisor, z() / divisor);
+	}
+	
+	public float x() {
+		return vector[0];
+	}
+	
+	public float y() {
+		return vector[1];
+	}
+	
+	public float z() {
+		return vector[2];
+	}
 
 	@Override
 	public int compareTo(Vector3f other) {

@@ -10,6 +10,10 @@ public class AABB {
 		this.min = min;
 		this.max = max;
 	}
+	
+	public Vector3f size() {
+		return max.sub(min, new Vector3f());
+	}
 
 	public Vector3f min() {
 		return min;
