@@ -88,4 +88,8 @@ public class VoxelContainer {
 	public Vector3i voxelCount() {
 		return voxelCount;
 	}
+
+	public int solidVoxelCount() {
+		return voxels.size();
+	}
 }

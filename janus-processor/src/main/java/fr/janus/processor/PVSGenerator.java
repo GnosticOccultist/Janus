@@ -43,8 +43,14 @@ public class PVSGenerator {
 		voxelizeModels(container, sceneBounds);
 		
 		logger.info("End voxelizing models.");
+		
+		logger.info("Solid voxel count: " + container.solidVoxelCount() + ".");
+		
+		logger.info("Begin creating scene tiles.");
+		// Subdivide the scene into tiles.
+		createSceneTiles();
 	}
-
+	
 	protected void voxelizeModels(VoxelContainer container, AABB sceneBounds) {
 		float[] boxHalfSize = new float[3];
 		// Calculate the voxel's half size in X, Y and Z axis.
@@ -104,5 +110,9 @@ public class PVSGenerator {
 				}
 			}
 		}
+	}
+	
+	protected void createSceneTiles() {
+		
 	}
 }
