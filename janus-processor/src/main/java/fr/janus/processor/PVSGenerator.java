@@ -5,6 +5,7 @@ import fr.alchemy.utilities.logging.FactoryLogger;
 import fr.alchemy.utilities.logging.Logger;
 import fr.janus.processor.Scene.ModelInstance;
 import fr.janus.processor.Scene.ModelType;
+import fr.janus.processor.Voxel.Status;
 import fr.janus.processor.util.AABB;
 import fr.janus.processor.util.CollisionUtils;
 import fr.janus.processor.util.Triangle;
@@ -14,43 +15,46 @@ import fr.janus.processor.util.Vector3i;
 public class PVSGenerator {
 
 	private static final Logger logger = FactoryLogger.getLogger("janus-processor.generator");
-	
+
 	private final Scene scene;
+
+	private VoxelContainer container;
 
 	public PVSGenerator(Scene scene) {
 		this.scene = scene;
 	}
-	
+
 	public void generate() {
 		logger.info("Begin generating PVS.");
-		
+
 		AABB sceneBounds = scene.getAABB();
 		logger.info("Scene AABB: " + sceneBounds + ".");
-		
+
 		Vector3f distance = sceneBounds.size();
-		
-		int cellCountX = (int) distance.x();
-		int cellCountY = (int) distance.y();
-		int cellCountZ = (int) distance.z();
-	
+		Vector3f cellSize = scene.options().voxelSize;
+
+		int cellCountX = (int) (distance.x() / cellSize.x());
+		int cellCountY = (int) (distance.y() / cellSize.y());
+		int cellCountZ = (int) (distance.z() / cellSize.z());
+
 		// Create a voxel container of specified dimensions.
-		VoxelContainer container = new VoxelContainer(new Vector3f(1, 1, 1), 
-				new Vector3i(cellCountX, cellCountY, cellCountZ));
-		
+		container = new VoxelContainer(new Vector3f(1, 1, 1), new Vector3i(cellCountX, cellCountY, cellCountZ));
+
 		logger.info("Begin voxelizing models.");
-		
+
 		// Voxelize all the models.
 		voxelizeModels(container, sceneBounds);
-		
+
 		logger.info("End voxelizing models.");
-		
+
 		logger.info("Solid voxel count: " + container.solidVoxelCount() + ".");
-		
+
 		logger.info("Begin creating scene tiles.");
 		// Subdivide the scene into tiles.
 		createSceneTiles();
+		logger.info("End creating scene tiles.");
 	}
-	
+
 	protected void voxelizeModels(VoxelContainer container, AABB sceneBounds) {
 		float[] boxHalfSize = new float[3];
 		// Calculate the voxel's half size in X, Y and Z axis.
@@ -81,15 +85,15 @@ public class PVSGenerator {
 				triVertices[0][0] = triangles.get(i).getA().x();
 				triVertices[0][1] = triangles.get(i).getA().y();
 				triVertices[0][2] = triangles.get(i).getA().z();
-				
+
 				triVertices[1][0] = triangles.get(i).getB().x();
 				triVertices[1][1] = triangles.get(i).getB().y();
 				triVertices[1][2] = triangles.get(i).getB().z();
-				
+
 				triVertices[2][0] = triangles.get(i).getC().x();
 				triVertices[2][1] = triangles.get(i).getC().y();
 				triVertices[2][2] = triangles.get(i).getC().z();
-				
+
 				// For all the potential voxels that can intersect the model.
 				for (int j = 0; j < boxes.size(); ++j) {
 					// Find the voxel center.
@@ -97,11 +101,11 @@ public class PVSGenerator {
 					Vector3f midpoint = new Vector3f();
 					box.max().add(box.min(), midpoint);
 					midpoint.div(2.0F);
-					
+
 					boxCenter[0] = midpoint.x();
 					boxCenter[1] = midpoint.y();
 					boxCenter[2] = midpoint.z();
-					
+
 					// Test for intersection between the triangle and the voxel's AABB.
 					if (CollisionUtils.triBoxOverlaps(boxCenter, boxHalfSize, triVertices) == 1) {
 						// Voxel is solid.
@@ -111,8 +115,44 @@ public class PVSGenerator {
 			}
 		}
 	}
-	
+
 	protected void createSceneTiles() {
-		
+		// Get the scene tile size.
+		Vector3i tileSize = scene.options().sceneTileSize;
+
+		// Calculate how many tiles needed based on the scene number of voxels.
+		Vector3i numberOfTiles = new Vector3i((int) (container.voxelCount().x() / tileSize.x()),
+				(int) (container.voxelCount().y() / tileSize.y()), (int) (container.voxelCount().z() / tileSize.z()));
+
+		Vector3i from = new Vector3i(), to = new Vector3i();
+		// Create the scene tiles.
+		for (var x = 0; x < numberOfTiles.x(); ++x) {
+			from.setX(x * tileSize.x());
+			to.setX(x * tileSize.x() + tileSize.x() - 1);
+
+			// Clamp to the bounds.
+			to.setX(Math.min(to.x(), container.voxelCount().x() - 1));
+			for (var y = 0; y < numberOfTiles.y(); ++y) {
+				from.setY(y * tileSize.y());
+				to.setY(y * tileSize.y() + tileSize.y() - 1);
+				
+				to.setY(Math.min(to.y(), container.voxelCount().y() - 1));
+				for (var z = 0; z < numberOfTiles.z(); ++z) {
+					from.setZ(z * tileSize.z());
+					to.setZ(z * tileSize.z() + tileSize.z() - 1);
+					
+					to.setZ(Math.min(to.z(), container.voxelCount().z() - 1));
+					
+					// Create the scene tile from the start and end voxel points.
+					SceneTile tile = new SceneTile(from, to);
+					
+					// Add the number of solid voxels to the cell.
+					// It will be used later when checking if we covered all voxels with cells.
+					container.forEach(from, to, v -> tile.increaseVoxelCount(), v -> v.status() == Status.SOLID);
+
+					scene.addTile(tile);
+				}
+			}
+		}
 	}
 }

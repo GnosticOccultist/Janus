@@ -1,6 +1,10 @@
 package fr.janus.processor;
 
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 import fr.alchemy.utilities.collections.array.Array;
+import fr.janus.processor.Voxel.Status;
 import fr.janus.processor.util.AABB;
 import fr.janus.processor.util.Vector3f;
 import fr.janus.processor.util.Vector3i;
@@ -9,7 +13,7 @@ public class VoxelContainer {
 
 	private final Vector3f voxelSize;
 	private final Vector3i voxelCount;
-	
+
 	private final Array<Vector3i> voxels = Array.ofType(Vector3i.class);
 
 	public VoxelContainer(Vector3f voxelSize, Vector3i voxelCount) {
@@ -22,11 +26,44 @@ public class VoxelContainer {
 		if (isPositionOutOfBounds(voxelIndex)) {
 			throw new RuntimeException("Voxel index " + voxelIndex + " is invalid!");
 		}
-		
+
 		// Add if not already exists.
 		if (!voxels.contains(voxelIndex)) {
 			voxels.add(voxelIndex);
 		}
+	}
+
+	public void forEach(Vector3i from, Vector3i to, Consumer<Voxel> consumer) {
+		forEach(from, to, consumer, null);
+	}
+
+	public void forEach(Vector3i from, Vector3i to, Consumer<Voxel> consumer, Predicate<Voxel> filter) {
+		Vector3i voxelPos = new Vector3i();
+		for (var x = from.x(); x <= to.x(); ++x) {
+			for (var y = from.y(); y <= to.y(); ++y) {
+				for (var z = from.z(); z <= to.z(); ++z) {
+					voxelPos.set(x, y, z);
+					Voxel voxel = voxelAt(voxelPos);
+					if (filter == null || filter.test(voxel)) {
+						consumer.accept(voxel);
+					}
+				}
+			}
+		}
+	}
+
+	private Voxel voxelAt(Vector3i voxelIndex) {
+		// Check valid position.
+		if (isPositionOutOfBounds(voxelIndex)) {
+			throw new RuntimeException("Voxel position " + voxelIndex + " is invalid!");
+		}
+
+		// If exists voxel in that place return it. Otherwise return empty Voxel.
+		if (voxels.contains(voxelIndex)) {
+			return new Voxel(Status.SOLID);
+		}
+
+		return new Voxel(Status.EMPTY);
 	}
 
 	public Array<AABB> getAllVoxelAABBFromVolume(AABB objectBounds, AABB worldBounds) {

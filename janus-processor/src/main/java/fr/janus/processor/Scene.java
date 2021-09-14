@@ -12,11 +12,23 @@ public class Scene implements Iterable<ModelInstance> {
 
 	public static final int DEFAULT_TILE_SIZE = 10;
 
+	private Options options;
+
+	private final Array<SceneTile> tiles = Array.ofType(SceneTile.class);
+	
 	private final Array<ModelInstance> models = Array.ofType(ModelInstance.class);
+
+	public Scene() {
+		this.options = new Options();
+	}
 
 	public void addModel(Model model, ModelType type) {
 		// TODO: Support model instance.
 		this.models.add(new ModelInstance(model, type));
+	}
+	
+	public void addTile(SceneTile tile) {
+		this.tiles.add(tile);
 	}
 
 	public AABB getAABB() {
@@ -35,6 +47,10 @@ public class Scene implements Iterable<ModelInstance> {
 		}
 
 		return new AABB(min, max);
+	}
+	
+	public Options options() {
+		return options;
 	}
 
 	public int modelCount() {

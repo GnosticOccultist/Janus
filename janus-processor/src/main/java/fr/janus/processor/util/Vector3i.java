@@ -33,13 +33,28 @@ public class Vector3i implements Comparable<Vector3i> {
 	public int x() {
 		return vector[0];
 	}
+	
+	public Vector3i setX(int x) {
+		this.vector[0] = x;
+		return this;
+	}
 
 	public int y() {
 		return vector[1];
 	}
+	
+	public Vector3i setY(int y) {
+		this.vector[1] = y;
+		return this;
+	}
 
 	public int z() {
 		return vector[2];
+	}
+	
+	public Vector3i setZ(int z) {
+		this.vector[2] = z;
+		return this;
 	}
 
 	@Override
