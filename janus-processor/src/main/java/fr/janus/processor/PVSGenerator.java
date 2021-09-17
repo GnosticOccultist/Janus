@@ -53,6 +53,12 @@ public class PVSGenerator {
 		// Subdivide the scene into tiles.
 		createSceneTiles();
 		logger.info("End creating scene tiles.");
+		
+		Array<Cell> cells = Array.ofType(Cell.class);
+		
+		logger.info("Begin generating cells.");
+		generateCellsFromEmptyVoxelsUsingTiles(cells);
+		logger.info("End generating cells.");
 	}
 
 	protected void voxelizeModels(VoxelContainer container, AABB sceneBounds) {
@@ -154,5 +160,26 @@ public class PVSGenerator {
 				}
 			}
 		}
+	}
+	
+	protected void generateCellsFromEmptyVoxelsUsingTiles(Array<Cell> cells) {
+		// Process scene tiles in parallel. Each one has it's own collection of cells and can read the voxel container concurrently.
+		scene.streamTiles().forEach(tile -> {
+			
+			// How many empty voxels are we expecting to have in this tile.
+			int expectedEmptyVoxels = tile.numberOfVoxelsInside() - tile.voxelCount();
+			
+			// If all the tile is solid, don't generate a cell.
+			if (expectedEmptyVoxels == 0) {
+				return;
+			}
+			
+			// Do while there are no pending empty voxels left in the tile.
+			while (expectedEmptyVoxels > 0) {
+				
+				// Take first seed voxel index.
+				Vector3i minVoxelPoint = 
+			}
+		});
 	}
 }

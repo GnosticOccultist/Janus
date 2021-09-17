@@ -1,6 +1,7 @@
 package fr.janus.processor;
 
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import fr.alchemy.utilities.collections.array.Array;
 import fr.janus.processor.Scene.ModelInstance;
@@ -55,6 +56,10 @@ public class Scene implements Iterable<ModelInstance> {
 
 	public int modelCount() {
 		return models.size();
+	}
+	
+	public Stream<SceneTile> streamTiles() {
+		return tiles.parallelStream();
 	}
 
 	@Override

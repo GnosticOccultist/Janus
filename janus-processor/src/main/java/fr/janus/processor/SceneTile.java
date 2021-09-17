@@ -17,4 +17,12 @@ public class SceneTile {
 	public void increaseVoxelCount() {
 		this.voxelCount++;
 	}
+	
+	public int voxelCount() {
+		return voxelCount;
+	}
+	
+	public int numberOfVoxelsInside() {
+		return (to.x() - from.x() + 1) * (to.y() - from.y() + 1) * (to.z() - from.z() + 1);
+	}
 }
