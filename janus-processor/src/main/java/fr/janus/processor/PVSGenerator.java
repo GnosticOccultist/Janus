@@ -6,6 +6,7 @@ import fr.alchemy.utilities.logging.Logger;
 import fr.janus.processor.Scene.ModelInstance;
 import fr.janus.processor.Scene.ModelType;
 import fr.janus.processor.Voxel.Status;
+import fr.janus.processor.VoxelContainer.Direction;
 import fr.janus.processor.util.AABB;
 import fr.janus.processor.util.CollisionUtils;
 import fr.janus.processor.util.Triangle;
@@ -53,9 +54,9 @@ public class PVSGenerator {
 		// Subdivide the scene into tiles.
 		createSceneTiles();
 		logger.info("End creating scene tiles.");
-		
+
 		Array<Cell> cells = Array.ofType(Cell.class);
-		
+
 		logger.info("Begin generating cells.");
 		generateCellsFromEmptyVoxelsUsingTiles(cells);
 		logger.info("End generating cells.");
@@ -141,17 +142,17 @@ public class PVSGenerator {
 			for (var y = 0; y < numberOfTiles.y(); ++y) {
 				from.setY(y * tileSize.y());
 				to.setY(y * tileSize.y() + tileSize.y() - 1);
-				
+
 				to.setY(Math.min(to.y(), container.voxelCount().y() - 1));
 				for (var z = 0; z < numberOfTiles.z(); ++z) {
 					from.setZ(z * tileSize.z());
 					to.setZ(z * tileSize.z() + tileSize.z() - 1);
-					
+
 					to.setZ(Math.min(to.z(), container.voxelCount().z() - 1));
-					
+
 					// Create the scene tile from the start and end voxel points.
 					SceneTile tile = new SceneTile(from, to);
-					
+
 					// Add the number of solid voxels to the cell.
 					// It will be used later when checking if we covered all voxels with cells.
 					container.forEach(from, to, v -> tile.increaseVoxelCount(), v -> v.status() == Status.SOLID);
@@ -161,25 +162,103 @@ public class PVSGenerator {
 			}
 		}
 	}
-	
+
 	protected void generateCellsFromEmptyVoxelsUsingTiles(Array<Cell> cells) {
-		// Process scene tiles in parallel. Each one has it's own collection of cells and can read the voxel container concurrently.
+		// Process scene tiles in parallel. Each one has it's own collection of cells
+		// and can read the voxel container concurrently.
 		scene.streamTiles().forEach(tile -> {
-			
+
 			// How many empty voxels are we expecting to have in this tile.
 			int expectedEmptyVoxels = tile.numberOfVoxelsInside() - tile.voxelCount();
-			
+
 			// If all the tile is solid, don't generate a cell.
 			if (expectedEmptyVoxels == 0) {
 				return;
 			}
-			
+
 			// Do while there are no pending empty voxels left in the tile.
 			while (expectedEmptyVoxels > 0) {
-				
+
 				// Take first seed voxel index.
-				Vector3i minVoxelPoint = 
+				Vector3i minVoxelPoint = findSeedPointInTile(tile, container);
+				
+				// Expand the cell until there is something that blocks the growth in that direction, then continue with the other directions.
 			}
 		});
+	}
+	
+	private void testExpansion(Vector3i minVoxelPoint, Vector3i maxVoxelPoint, Direction direction, VoxelContainer container, SceneTile tile) {
+		// Determine in which dimension to move.
+		
+		Vector3i lastValidMaxPoint = null, lastValidMinPoint = null;
+		boolean isNewAABBValid = true;
+		// Expand AABB until it is not yet valid (collides with a solid voxel in the scene).
+		while (isNewAABBValid) {
+			
+			Vector3i offset = direction.offset();
+			
+			lastValidMaxPoint = maxVoxelPoint;
+			lastValidMinPoint = minVoxelPoint;
+			
+			// See if need to expand max or min point.
+			if (direction.isPositive()) {
+				maxVoxelPoint.add(offset);
+			} else {
+				minVoxelPoint.add(offset);
+			}
+			
+			// Don't let the AABB be bigger than the setting.
+			Vector3i maxCellSize = scene.options().maxCellSize;
+			Vector3i size = maxVoxelPoint.sub(minVoxelPoint, null);
+			if (size.x() > maxCellSize.x() || size.y() > maxCellSize.y() || size.z() > maxCellSize.z()) {
+				isNewAABBValid = false;
+			} else {
+				// Try the newly expanded cell.
+				isNewAABBValid = tryNewAABB(minVoxelPoint, maxVoxelPoint, direction, container, tile);
+			}
+		}
+		
+		maxVoxelPoint = lastValidMaxPoint;
+		minVoxelPoint = lastValidMinPoint;
+	}
+
+	private boolean tryNewAABB(Vector3i minVoxelPoint, Vector3i maxVoxelPoint, Direction direction,
+			VoxelContainer container2, SceneTile tile) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private Vector3i findSeedPointInTile(SceneTile tile, VoxelContainer container) {
+		Vector3i voxelPos = new Vector3i();
+
+		for (int i = tile.from().x(); i <= tile.to().x(); ++i) {
+			voxelPos.setX(i);
+			for (int j = tile.from().y(); j <= tile.to().y(); ++j) {
+				voxelPos.setY(j);
+				for (int k = tile.from().z(); k <= tile.to().z(); ++k) {
+					voxelPos.setZ(k);
+					if (container.voxelAt(voxelPos).status() == Status.EMPTY
+							&& !isVoxelInsideAnExistingCells(tile.cells(), voxelPos)) {
+						return voxelPos;
+					}
+				}
+			}
+		}
+		throw new RuntimeException("Can't find empty seed voxel.");
+	}
+
+	private boolean isVoxelInsideAnExistingCells(Array<Cell> existingCells, Vector3i point) {
+		for (Cell cell : existingCells) {
+			if (isVoxelInsideCell(cell, point)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isVoxelInsideCell(Cell cell, Vector3i point) {
+		return point.x() >= cell.minPoint().x() && point.x() <= cell.maxPoint().x() && point.y() >= cell.minPoint().y()
+				&& point.y() <= cell.maxPoint().y() && point.z() >= cell.minPoint().z()
+				&& point.z() <= cell.maxPoint().z();
 	}
 }

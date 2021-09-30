@@ -17,4 +17,12 @@ public class Cell {
 		this.models = Array.ofType(Integer.class);
 		this.visibleCells = Array.ofType(Cell.class);
 	}
+	
+	public Vector3i minPoint() {
+		return minPoint;
+	}
+	
+	public Vector3i maxPoint() {
+		return maxPoint;
+	}
 }

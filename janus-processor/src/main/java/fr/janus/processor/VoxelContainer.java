@@ -52,7 +52,7 @@ public class VoxelContainer {
 		}
 	}
 
-	private Voxel voxelAt(Vector3i voxelIndex) {
+	public Voxel voxelAt(Vector3i voxelIndex) {
 		// Check valid position.
 		if (isPositionOutOfBounds(voxelIndex)) {
 			throw new RuntimeException("Voxel position " + voxelIndex + " is invalid!");
@@ -128,5 +128,28 @@ public class VoxelContainer {
 
 	public int solidVoxelCount() {
 		return voxels.size();
+	}
+
+	public enum Direction {
+		POSITIVE_X(1, 0, 0), 
+		NEGATIVE_X(-1, 0, 0), 
+		POSITIVE_Y(0, 1, 0), 
+		NEGATIVE_Y(0, -1, 0), 
+		POSITIVE_Z(0, 0, 1), 
+		NEGATIVE_Z(0, 0, -1);
+		
+		Vector3i offset;
+		
+		private Direction(int x, int y, int z) {
+			this.offset = new Vector3i(x, y, z);
+		}
+		
+		public Vector3i offset() {
+			return offset;
+		}
+		
+		public boolean isPositive() {
+			return this == POSITIVE_X || this == POSITIVE_Y || this == POSITIVE_Z;
+		}
 	}
 }

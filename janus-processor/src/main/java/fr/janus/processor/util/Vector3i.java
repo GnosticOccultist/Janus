@@ -29,6 +29,28 @@ public class Vector3i implements Comparable<Vector3i> {
 		this.vector[2] = z;
 		return this;
 	}
+	
+	public Vector3i add(Vector3i offset) {
+		this.vector[0] += offset.x();
+		this.vector[1] += offset.y();
+		this.vector[2] += offset.z();
+		return this;
+	}
+	
+	public Vector3i sub(Vector3i offset) {
+		this.vector[0] -= offset.x();
+		this.vector[1] -= offset.y();
+		this.vector[2] -= offset.z();
+		return this;
+	}
+	
+	public Vector3i sub(Vector3i offset, Vector3i store) {
+		Vector3i result = store == null ? new Vector3i() : store;
+		result.setX(x() - offset.x());
+		result.setX(y() - offset.y());
+		result.setX(z() - offset.z());
+		return this;
+	}
 
 	public int x() {
 		return vector[0];
@@ -75,5 +97,4 @@ public class Vector3i implements Comparable<Vector3i> {
 	public String toString() {
 		return Arrays.toString(vector);
 	}
-
 }
