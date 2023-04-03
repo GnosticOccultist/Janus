@@ -15,6 +15,13 @@ public class Triangle {
 		this.b = b;
 		this.c = c;
 	}
+	
+	public Triangle set(Triangle other) {
+		a.set(other.a);
+		b.set(other.b);
+		c.set(other.c);	
+		return this;
+	}
 
 	public Vector3f getA() {
 		return a;
@@ -26,5 +33,18 @@ public class Triangle {
 
 	public Vector3f getC() {
 		return c;
+	}
+
+	public Triangle transform(Matrix4f transform, Triangle store) {
+		var result = store != null ? store : new Triangle();
+		result.set(this);
+		return result.transform(transform);
+	}
+
+	public Triangle transform(Matrix4f transform) {
+		a.transform(transform);
+		b.transform(transform);
+		c.transform(transform);
+		return this;
 	}
 }

@@ -2,7 +2,6 @@ package fr.janus.processor;
 
 import java.util.Arrays;
 
-import fr.janus.processor.util.AABB;
 import fr.janus.processor.util.Triangle;
 import fr.janus.processor.util.Vector3f;
 
@@ -12,28 +11,12 @@ public class Model {
 
 	private final int[] indices;
 
-	private final AABB bounds;
-
 	public Model(float[] vertices, int vertexCount, int[] indices, int triangleCount) {
 		this.vertices = new float[vertexCount * 3];
 		this.indices = new int[triangleCount * 3];
 
 		System.arraycopy(vertices, 0, this.vertices, 0, vertexCount * 3);
 		System.arraycopy(indices, 0, this.indices, 0, triangleCount * 3);
-
-		this.bounds = calculateAABB();
-	}
-
-	private AABB calculateAABB() {
-		Vector3f max = new Vector3f(vertices, 0);
-		Vector3f min = new Vector3f(vertices, 0);
-
-		for (int i = 1; i < vertexCount(); ++i) {
-			min.min(vertices, i * 3);
-			max.max(vertices, i * 3);
-		}
-		
-		return new AABB(min, max);
 	}
 
 	public int vertexCount() {
@@ -44,8 +27,8 @@ public class Model {
 		return indices.length / 3;
 	}
 
-	public AABB getAABB() {
-		return bounds;
+	public int indicesCount() {
+		return indices.length;
 	}
 
 	public Triangle getTriangle(int index) {

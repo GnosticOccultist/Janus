@@ -12,13 +12,13 @@ public class Main {
 		Model first = new Model(vertices, 3, indices, 1);
 
 		vertices = new float[] { 0, -1, 0, 1, -1, 0, 1, 0, 0 };
-		indices = new int[] { 1, 3, 2 };
+		indices = new int[] { 0, 2, 1 };
 
 		Model second = new Model(vertices, 3, indices, 1);
 
 		Scene scene = new Scene();
-		scene.addModel(first, ModelType.OCCLUDEE);
-		scene.addModel(second, ModelType.OCCLUDER);
+		scene.addModel(first, 0, ModelType.OCCLUDEE);
+		scene.addModel(second, 1, ModelType.OCCLUDER);
 
 		System.out.println(scene.getAABB());
 	}

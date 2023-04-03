@@ -3,7 +3,6 @@ package fr.janus.processor;
 import fr.alchemy.utilities.collections.array.Array;
 import fr.alchemy.utilities.logging.FactoryLogger;
 import fr.alchemy.utilities.logging.Logger;
-import fr.janus.processor.Scene.ModelInstance;
 import fr.janus.processor.Scene.ModelType;
 import fr.janus.processor.Voxel.Status;
 import fr.janus.processor.VoxelContainer.Direction;
@@ -69,15 +68,15 @@ public class PVSGenerator {
 		boxHalfSize[1] = container.voxelSize().y() / 2.0F;
 		boxHalfSize[2] = container.voxelSize().z() / 2.0F;
 
-		for (ModelInstance model : scene) {
+		for (ModelInstance instance : scene) {
 
 			// Only voxelize occluder models.
-			if (model.type() == ModelType.OCCLUDEE) {
+			if (instance.type() == ModelType.OCCLUDEE) {
 				continue;
 			}
 
 			Array<Triangle> triangles = Array.ofType(Triangle.class);
-			AABB modelBounds = model.getBounds();
+			AABB modelBounds = instance.getBounds();
 			// Get all the voxels AABB that are bounding the model. This will be used as
 			// potential voxels to test for intersection.
 			Array<AABB> boxes = container.getAllVoxelAABBFromVolume(modelBounds, sceneBounds);
